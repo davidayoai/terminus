@@ -76,6 +76,8 @@ const Terminal: React.FC<TerminalProps> = ({ lines, onCommand, isProcessing }) =
                         disabled={isProcessing}
                         className="flex-1 bg-transparent outline-none text-white font-mono placeholder-green-700/50"
                         placeholder={isProcessing ? "Executing..." : "Type 'help' to begin"}
+                        suppressHydrationWarning={true}
+                        autoComplete="off"
                     />
                 </div>
             </form>

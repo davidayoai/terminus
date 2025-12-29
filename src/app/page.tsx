@@ -1,10 +1,9 @@
 // src/app/page.tsx
-'use client';
 
+'use client';
 import React, { useState, useEffect } from 'react';
 import { TerminalLine, Task, LLMAnalysis } from '@/types';
 import Terminal from '@/components/Terminal';
-import { generateTaskAnalysis, generateNewTask } from '@/services/geminiService';
 import { Terminal as TerminalIcon, Cpu, Zap, Bug, ShieldCheck, Settings } from 'lucide-react';
 
 export default function App() {
@@ -64,7 +63,7 @@ export default function App() {
       });
     } else if (cmd === 'env') {
       addLine('ACTIVE_AGENT=terminus', 'output');
-      addLine('MODEL_ENDPOINT=openai-tbench/gpt-4o (via Portkey)', 'output');
+      addLine('MODEL_ENDPOINT=gpt-4o (via Portkey)', 'output');
       addLine('API_KEY=kkhew+QoeRAovQpeA758RifFqIK+ (Configured)', 'output');
     } else if (cmd.startsWith('cat task ')) {
       const id = cmd.split(' ').pop();
@@ -100,8 +99,20 @@ export default function App() {
       addLine(`Injecting payload: ${task.title}`, 'system');
 
       try {
-        const result = await generateTaskAnalysis(task.prompt, model);
-        setAnalysis({ ...result, model });
+        const res = await fetch('/api/terminus/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ taskPrompt: task.prompt, model }),
+        });
+
+        const json = await res.json();
+
+        if (!json.success) {
+          throw new Error(json.error || 'Unknown API error');
+        }
+
+        const result = json.data;
+        setAnalysis(result);
 
         addLine('Analysis complete.', 'success');
         if (result.status === 'BREAKTHROUGH') {
@@ -120,18 +131,27 @@ export default function App() {
       const topic = command.split(' ').slice(3).join(' ') || 'Cloud Infrastructure';
       setIsProcessing(true);
       addLine(`Synthesizing new adversarial task for: ${topic}...`, 'system');
+
       try {
-        const newTask = await generateNewTask(topic);
-        if (newTask) {
-          const id = (Math.floor(Math.random() * 900) + 200).toString();
-          const taskObj = { ...newTask, id };
-          setTasks(prev => [...prev, taskObj]);
-          addLine(`New task [${id}] "${newTask.title}" registered to repository.`, 'success');
-        } else {
-          addLine('Synthesis failed: No response.', 'error');
+        const res = await fetch('/api/terminus/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ topic }),
+        });
+
+        const json = await res.json();
+
+        if (!json.success) {
+          throw new Error(json.error || 'Generation failed');
         }
-      } catch (err) {
-        addLine('Synthesis failed.', 'error');
+
+        const newTask = json.data;
+        const id = (Math.floor(Math.random() * 900) + 200).toString();
+        const taskObj = { ...newTask, id };
+        setTasks(prev => [...prev, taskObj]);
+        addLine(`New task [${id}] "${newTask.title}" registered to repository.`, 'success');
+      } catch (err: any) {
+        addLine(`Synthesis failed: ${err.message || 'Unknown error'}`, 'error');
       } finally {
         setIsProcessing(false);
       }
