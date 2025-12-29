@@ -1,36 +1,31 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 💻 Project Terminus
 
-## Getting Started
+**Project Terminus** is a research-driven framework for designing **terminal-based coding tasks that intentionally cause Large Language Model (LLM) failures**. The project focuses on exposing weaknesses in reasoning, tool usage, environment assumptions, and execution fidelity by crafting adversarial, real-world CLI scenarios.
 
-First, run the development server:
+The goal is not to “trick” models for novelty, but to **systematically evaluate and improve robustness** in coding agents, automation pipelines, and AI-assisted development workflows.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🧠 Core Objectives
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Design terminal-based coding challenges that surface LLM failure modes
+- Stress-test reasoning across:
+  - Environment setup
+  - Dependency resolution
+  - File system assumptions
+  - Stateful CLI workflows
+- Build reusable, customizable task templates for evaluation and experimentation
+- Enable reproducible failure cases using Dockerized environments
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 🧪 What Makes These Tasks Hard
 
-To learn more about Next.js, take a look at the following resources:
+Project Terminus tasks are intentionally designed to break common LLM assumptions, including:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Incomplete or misleading CLI output
+- Non-standard directory structures
+- Hidden environment constraints
+- Multi-step commands with state dependency
+- Ambiguous success conditions
+- Tooling mismatches (Python versioning, shell differences, missing binaries)
