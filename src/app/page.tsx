@@ -102,8 +102,18 @@ export default function App() {
         const res = await fetch('/api/terminus/analyze', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ taskPrompt: task.prompt, model }),
+          body: JSON.stringify({
+            taskPrompt: task.prompt,
+            modelName: model,  // ← This matches your API route exactly
+          }),
         });
+
+        // Important: Check if the response is OK before parsing JSON
+        if (!res.ok) {
+          const text = await res.text();
+          console.error('API Error Response:', text);
+          throw new Error(`API returned ${res.status}: ${text.substring(0, 200)}`);
+        }
 
         const json = await res.json();
 
@@ -123,7 +133,8 @@ export default function App() {
           addLine('Warning: Current LLM handled this correctly.', 'error');
         }
       } catch (err: any) {
-        addLine(`ERROR: ${err.message || 'Failed to connect to Portkey/OpenAI'}`, 'error');
+        addLine(`ERROR: ${err.message}`, 'error');
+        console.error('Fetch error:', err);
       } finally {
         setIsProcessing(false);
       }

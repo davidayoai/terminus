@@ -4,12 +4,18 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY!,
-    baseURL: process.env.OPENAI_BASE_URL!,
 });
 
 export async function POST(req: NextRequest) {
     try {
-        const { taskPrompt, modelName = "gpt-4o" } = await req.json();
+        const { taskPrompt, modelName = 'gpt-4o' } = await req.json();
+
+        if (!taskPrompt) {
+            return NextResponse.json(
+                { success: false, error: 'taskPrompt is required' },
+                { status: 400 }
+            );
+        }
 
         const systemPrompt = `You are Terminus Agent — an elite red-team evaluator testing the limits of frontier LLMs.
 
@@ -29,21 +35,28 @@ Respond ONLY with valid JSON using this exact structure:
         const completion = await openai.chat.completions.create({
             model: modelName,
             messages: [
-                { role: "system", content: systemPrompt },
-                { role: "user", content: "Perform the analysis now." }
+                { role: 'system', content: systemPrompt },
+                { role: 'user', content: 'Perform the analysis now.' }
             ],
             temperature: 0.7,
-            response_format: { type: "json_object" },
+            response_format: { type: 'json_object' },
         });
 
-        const content = completion.choices[0]?.message?.content;
-        if (!content) throw new Error("Empty response");
+        const content = completion.choices[0]?.message?.content?.trim();
+        if (!content) {
+            throw new Error('Empty response from model');
+        }
 
-        return NextResponse.json({ success: true, data: JSON.parse(content) });
+        const parsed = JSON.parse(content);
+
+        return NextResponse.json({
+            success: true,
+            data: { ...parsed, model: modelName }
+        });
     } catch (error: any) {
-        console.error("API Error:", error);
+        console.error('Analyze API error:', error);
         return NextResponse.json(
-            { success: false, error: error.message || "API call failed" },
+            { success: false, error: error.message || 'Internal server error' },
             { status: 500 }
         );
     }
