@@ -36,7 +36,7 @@ export default function App() {
   useEffect(() => {
     addLine('PROJECT TERMINUS [Version 3.1.0]', 'system');
     addLine('Initializing environment variables...', 'system');
-    addLine('export OPENAI_API_KEY=kkhew+... (Configured)', 'system');
+    addLine('export OPENAI_API_KEY=)', 'system');
     addLine('export OPENAI_BASE_URL=https://api.portkey.ai/v1', 'system');
     addLine('Ready for input. Type "help" for available commands.', 'success');
   }, []);
